@@ -2,6 +2,18 @@
 #include "TXLib.h"
 const float dt = 1;
 
+struct Ball
+{
+  int r = 0;
+  int red = 0;
+  int green = 0;
+  int blue = 0;
+  float x = 0;
+  float y = 0;
+  float vx = 0;
+  float vy = 0;
+};
+
 void drawBall(int x, int y, int r, int red, int green, int blue)
 {
   COLORREF color = txGetFillColor();
@@ -43,8 +55,8 @@ void slowDown(float* vx, float* vy)
 
 void slowDownPlayer(float* vx, float* vy)
 {
-  *vy *= 0.98;
-  *vx *= 0.98;
+  *vy *= 0.96;
+  *vx *= 0.96;
 }
 
 void controlBall(float* vx, float* vy, float dv)
@@ -74,16 +86,63 @@ float th_sqr(float x)
   return x * x;
 }
 
-void userInt(string s)
+void th_paste_b(Ball safe, Ball b_features[], float n)
 {
-  if (s == "level")
-    std::cout << " Choose your level '1-10'"<< std::endl;
-  if (s =="balls")
-    std::cout << "How many Balls? '1-50'" << std::endl;
-  if (s == "ball_f")
-    std::cout << "r, red, green, blue of the balls" << std::endl;
-  if (s == "player")
-    std::cout << "r, red, green, blue of the PLAYER" << std::endl;
-  if (s == "again")
-    std::cout << " play again? '1 - 0'" << std::endl;
+  for(int i = 0; i < n; i++)
+  {
+    b_features[i].r = safe.r;
+    b_features[i].red = safe.red;
+    b_features[i].green = safe.green;
+    b_features[i].blue = safe.blue;
+    b_features[i].x = 700;
+    b_features[i].y = 400;
+    b_features[i].vx = (n / 2 - i + 0.3) * 0.7 +0.3 ;
+    b_features[i].vy = th_sqr(i - n / 2) * 0.1 + 10;
+  }
+}
+
+void th_safe(float r, int red, int green, int blue, Ball* safe)
+{
+  (*safe).r = r;
+  (*safe).red = red;
+  (*safe).green = green;
+  (*safe).blue = blue;
+}
+
+void th_paste_p(Ball safe, Ball* player)
+{
+  (*player).r = safe.r;
+  (*player).red = safe.red;
+  (*player).green = safe.green;
+  (*player).blue = safe.blue;
+  (*player).x = 200;
+  (*player).y = 200;
+  (*player).vx = 0;
+  (*player).vy = 0;
+}
+
+bool gameOver(Ball player, int level)
+{
+  bool ifstate = false;
+  ifstate = ifstate or (player.x < player.r) or (player.x > 1000 - player.r);
+  ifstate = ifstate or (player.y < player.r) or (player.y > 600 - player.r);
+  ifstate = ifstate or sqrt(th_sqr(player.x - 500) + th_sqr(player.y - 300)) < player.r + level*20;
+  return ifstate;
+}
+
+void checkCollision(Ball player, Ball b_features[], int* caught, int n)
+{
+  for (int i = 0; i < n; i++)
+    if (sqrt(th_sqr(player.x - b_features[i].x) + th_sqr(player.y - b_features[i].y)) < player.r + b_features[i].r)
+      {
+        b_features[i].r = -player.r - 1;
+        *caught += 1;
+      }
+}
+
+bool gameContinue(bool ifstate, int caught, int n)
+{
+  if (ifstate or caught == n)
+    return true;
+  return false;
 }
