@@ -113,21 +113,6 @@ float th_sqr(float x)
   return x * x;
 }
 
-void th_paste_b(Ball safe, Ball b_features[], float n)
-{
-  for(int i = 0; i < n; i++)
-  {
-    b_features[i].r = safe.r;
-    b_features[i].red = safe.red;
-    b_features[i].green = safe.green;
-    b_features[i].blue = safe.blue;
-    b_features[i].x = 700;
-    b_features[i].y = 400;
-    b_features[i].vx = (n / 2 - i + 0.3) * 0.7 +0.3 ;
-    b_features[i].vy = th_sqr(i - n / 2) * 0.1 + 10;
-  }
-}
-
 void th_download(string name ,Ball* safe)
 {
   int r, red, green, blue = {1};
@@ -149,16 +134,26 @@ void th_download(string name ,Ball* safe)
   (*safe).blue = blue;
 }
 
-void th_paste_p(Ball safe, Ball* player)
+void th_paste(Ball safe, Ball* player, string name, float n, int i)
 {
   (*player).r = safe.r;
   (*player).red = safe.red;
   (*player).green = safe.green;
   (*player).blue = safe.blue;
-  (*player).x = 200;
-  (*player).y = 200;
-  (*player).vx = 0;
-  (*player).vy = 0;
+  if (name == "ball")
+  {
+    (*player).x = 700;
+    (*player).y = 400;
+    (*player).vx = (n / 2 - i + 0.3) * 0.7 +0.3 ;
+    (*player).vy = th_sqr(i - n / 2) * 0.1 + 10;
+  }
+  else
+  {
+    (*player).x = 200;
+    (*player).y = 200;
+    (*player).vx = 0;
+    (*player).vy = 0;
+  }
 }
 
 bool gameOver(Ball player, int level, int caught, int n)
@@ -208,8 +203,9 @@ int main()
 
   while (again)
   {
-    th_paste_b(safe_b, b_features, n);
-    th_paste_p(safe_p, &player);
+    for(int i = 0; i < n; i++)
+      th_paste(safe_b, &b_features[i], "ball", n, i);
+    th_paste(safe_p, &player, "player", n, 1);
 
     for (int i = 0; i < 30; i++)
       std::cout << std::endl;
