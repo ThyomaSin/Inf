@@ -23,9 +23,7 @@ void moveBall(Ball* ball, float dt);
 
 void wallHit(Ball* ball);
 
-void slowDown(Ball* ball);
-
-void absoluteSlowDown(Ball* ball);
+void slowDown(Ball* ball, float acc);
 
 void controlBall(float* vx, float* vy, float dv);
 
@@ -38,6 +36,8 @@ bool gameOver(Ball player, int level, int caught, int n);
 bool checkCollision(Ball ball1, Ball ball2);
 
 void resolveCollision(Ball player, Ball* ball, int* caught);
+
+float velocity(Ball ball);
 
 
 
@@ -72,18 +72,10 @@ void moveBall(Ball* ball, float dt)
   (*ball).y += (*ball).vy * dt;
 }
 
-void slowDown(Ball* ball)
+void slowDown(Ball* ball, float acc)
 {
-  if ((*ball).vx > 0.9)
-    (*ball).vx *= 0.97;
-  if ((*ball).vy > 0.9)
-    (*ball).vy *= 0.97;
-}
-
-void absoluteSlowDown(Ball* ball)
-{
-  (*ball).vy *= 0.96;
-  (*ball).vx *= 0.96;
+  (*ball).vx *= acc;
+  (*ball).vy *= acc;
 }
 
 void controlBall(Ball* ball, float dv)
@@ -135,4 +127,9 @@ void resolveCollision(Ball player, Ball* ball, int* caught)
 {
   *caught += 1;
   (*ball).r = - player.r - 1;
+}
+
+float velocity(Ball ball)
+{
+  return sqrt(th_sqr(ball.vx) + th_sqr(ball.vy));
 }

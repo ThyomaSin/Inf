@@ -42,8 +42,8 @@ int main()
 
   for(int i = 0; i < n; i++)
   {
-    b_features[i].vx = (n / 2 - i + 0.3) * 0.7 +0.3;
-    b_features[i].vy = th_sqr(i - n / 2) * 0.1 + 10;
+    b_features[i].vx = th_sqr(n / 2 - i + 0.5)  + 70;
+    b_features[i].vy = th_sqr(i - n / 2) + 40;
   }
 
   player.r = 20;
@@ -54,7 +54,7 @@ int main()
   for (int i = 0; i < 30; i++)
     std::cout << std::endl;
 
-  int caught = 0;
+  int caught = 0, time = 0;
   while (true)
   {
     drawCircle(500,300,level);
@@ -63,29 +63,31 @@ int main()
       drawBall(b_features[i]);
       moveBall(&b_features[i], dt);
       wallHit(&b_features[i]);
-      slowDown(&b_features[i]);
+      if (velocity(b_features[i]) > 1.6)
+        slowDown(&b_features[i], 0.95);
     }
     drawBall(player);
     moveBall(&player, dt);
-    absoluteSlowDown(&player);
+    slowDown(&player, 0.96);
 
     controlBall(&player, dv);
 
     for (int i = 0; i < n; i++)
-      if (checkCollision(player, b_features[i]))
+      if (checkCollision(player, b_features[i]) and (time > 150))
         resolveCollision(player, &b_features[i], &caught);
 
     if (gameOver(player, level, caught, n))
       break;
 
     txSleep(4);
+    time += 1;
 
     txClear();
   }
   if (caught != n)
     std::cout << "YOU LOOSE!";
   else
-    std::cout << "YOU WON!";
+    std::cout << "YOU WON!  " << "your time = " << time;
 
   return 0;
 }
