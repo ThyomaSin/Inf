@@ -8,38 +8,16 @@ const float dt = 1;
 struct Ball
 {
   int r = 10;
-  int red = 200;
-  int green = 200;
-  int blue = 200;
+  int red = 255;
+  int green = 255;
+  int blue = 255;
   float x = 800;
   float y = 400;
   float vx = 0;
   float vy = 0;
 };
 
-void drawBall(Ball ball);
-
-void moveBall(Ball* ball, float dt);
-
-void wallHit(Ball* ball);
-
-void slowDown(Ball* ball, float acc);
-
-void controlBall(float* vx, float* vy, float dv);
-
-void drawCircle(int x, int y, int level);
-
-float th_sqr(float x);
-
-bool gameOver(Ball player, int level, int caught, int n);
-
-bool checkCollision(Ball ball1, Ball ball2);
-
-void resolveCollision(Ball player, Ball* ball, int* caught);
-
 float velocity(Ball ball);
-
-
 
 void drawBall(Ball ball)
 {
@@ -60,10 +38,27 @@ void drawBall(Ball ball)
 
 void wallHit(Ball* ball)
 {
-  if (((*ball).y > 600 - (*ball).r) or ((*ball).y < (*ball).r))
+  if ((*ball).y > 600 - (*ball).r)
+  {
+    (*ball).y -= (*ball).r/2;
     (*ball).vy = -(*ball).vy;
-  if (((*ball).x > 1000 - (*ball).r) or ((*ball).x < (*ball).r))
+  }
+  if ((*ball).y < (*ball).r)
+  {
+    (*ball).y += (*ball).r/2;
+    (*ball).vy = -(*ball).vy;
+  }
+  if ((*ball).x > 1000 - (*ball).r)
+  {
+    (*ball).x -= (*ball).r/2;
     (*ball).vx = -(*ball).vx;
+  }
+  if ((*ball).x < (*ball).r)
+  {
+    (*ball).x += (*ball).r/2;
+    (*ball).vx = -(*ball).vx;
+  }
+
 }
 
 void moveBall(Ball* ball, float dt)
@@ -72,10 +67,13 @@ void moveBall(Ball* ball, float dt)
   (*ball).y += (*ball).vy * dt;
 }
 
-void slowDown(Ball* ball, float acc)
+void slowDown(Ball* ball, float acc, float Vmin)
 {
-  (*ball).vx *= acc;
-  (*ball).vy *= acc;
+  if (velocity(*ball) > Vmin)
+  {
+    (*ball).vx *= acc;
+    (*ball).vy *= acc;
+  }
 }
 
 void controlBall(Ball* ball, float dv)
@@ -92,12 +90,16 @@ void controlBall(Ball* ball, float dv)
 
 void drawCircle(int x, int y, int level)
 {
+  COLORREF color = txGetFillColor();
+
   txSetColor(RGB(255,0,0));
   txSetFillColor(RGB(255,0,0));
   txCircle(x,y,level*20);
   txSetColor(RGB(0,0,0));
   txSetFillColor(RGB(0,0,0));
   txCircle(x,y,level*20 - 5);
+
+  txSetColor(color);
 }
 
 float th_sqr(float x)

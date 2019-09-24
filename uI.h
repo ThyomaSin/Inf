@@ -1,10 +1,5 @@
 #include <iostream>
 
-int th_level(void);
-
-float getNumber(void);
-
-
 int th_level(void)
 {
   int level = 1;

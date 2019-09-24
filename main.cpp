@@ -63,12 +63,11 @@ int main()
       drawBall(b_features[i]);
       moveBall(&b_features[i], dt);
       wallHit(&b_features[i]);
-      if (velocity(b_features[i]) > 1.6)
-        slowDown(&b_features[i], 0.95);
+      slowDown(&b_features[i], 0.94, 2);
     }
     drawBall(player);
     moveBall(&player, dt);
-    slowDown(&player, 0.96);
+    slowDown(&player, 0.96, 0);
 
     controlBall(&player, dv);
 
