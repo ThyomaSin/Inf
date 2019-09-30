@@ -1,124 +1,133 @@
 #include <iostream>
 #include "TXLib.h"
+#include "uI.h"
+#include "Vector2f.h"
+#include <math.h>
+
 const float dt = 1;
 
 struct Ball
 {
-  int r = 0;
-  int red = 0;
-  int green = 0;
-  int blue = 0;
-  float x = 0;
-  float y = 0;
-  float vx = 0;
-  float vy = 0;
+  int r = 10;
+  int red = 255;
+  int green = 255;
+  int blue = 255;
+  Vector2f position;
+  Vector2f velocity;
 };
 
-void drawBall(int x, int y, int r, int red, int green, int blue)
+
+float velocity(Ball ball);
+
+void drawBall(Ball ball)
 {
   COLORREF color = txGetFillColor();
-  for(int i = r; i > 1; i--)
+  for(int i = ball.r; i > 1; i--)
   {
-    int red_i = red - red * i / r;
-    int green_i = green - green * i / r;
-    int blue_i = blue - blue * i / r;
+    int red_i = ball.red - ball.red * i / ball.r;
+    int green_i = ball.green - ball.green * i / ball.r;
+    int blue_i = ball.blue - ball.blue * i / ball.r;
 
     txSetColor(RGB(red_i,green_i,blue_i));
     txSetFillColor(RGB(red_i,green_i,blue_i));
-    txCircle(x-(r-i)/2,y-(r-i)/2.3,i);
+    txCircle(ball.position.x - (ball.r - i) / 2, ball.position.y - (ball.r - i) / 2.3, i);
   }
   txSetColor(color);
   txSetFillColor(color);
 }
 
-void wallHit(float* x, float* y, float* vx, float* vy, float r)
+void wallHit(Ball* ball)
 {
-  if ((*y > 600 - r) or (*y < r))
-    *vy = -*vy;
-  if ((*x > 1000 - r) or (*x < r))
-    *vx = -*vx;
+  if ((*ball).position.y > 600 - (*ball).r)
+  {
+    (*ball).position.y = 600 - (*ball).r;
+    (*ball).velocity.y = -(*ball).velocity.y;
+  }
+  if ((*ball).position.y < (*ball).r)
+  {
+    (*ball).position.y = 0 + (*ball).r;
+    (*ball).velocity.y = -(*ball).velocity.y;
+  }
+  if ((*ball).position.x > 1000 - (*ball).r)
+  {
+    (*ball).position.x = 1000 - (*ball).r;
+    (*ball).velocity.x = -(*ball).velocity.x;
+  }
+  if ((*ball).position.x < (*ball).r)
+  {
+    (*ball).position.x = (*ball).r;
+    (*ball).velocity.x = -(*ball).velocity.x;
+  }
+
 }
 
-void moveBall(float* x, float* y, float* vx, float* vy, float dt)
+void moveBall(Ball* ball, float dt)
 {
-  *x += *vx * dt;
-  *y += *vy * dt;
+  (*ball).position = add((*ball).position, (*ball).velocity);
 }
 
-void slowDown(float* vx, float* vy)
+void slowDown(Ball* ball, float acc, float Vmin)
 {
-  if (*vx > 0.9)
-    *vx *= 0.97;
-  if (*vy > 0.9)
-    *vy *= 0.97;
+  if (velocity(*ball) > Vmin)
+    (*ball).velocity = mul((*ball).velocity, acc);
 }
 
-void slowDownPlayer(float* vx, float* vy)
-{
-  *vy *= 0.96;
-  *vx *= 0.96;
-}
-
-void controlBall(float* vx, float* vy, float dv)
+void controlBall(Ball* ball, float dv)
 {
   if (GetAsyncKeyState(VK_LEFT))
-    *vx -= dv;
+    (*ball).velocity.x -= dv;
   if (GetAsyncKeyState(VK_UP))
-    *vy -= dv;
+    (*ball).velocity.y -= dv;
   if (GetAsyncKeyState(VK_RIGHT))
-    *vx += dv;
+    (*ball).velocity.x += dv;
   if (GetAsyncKeyState(VK_DOWN))
-    *vy += dv;
+    (*ball).velocity.y += dv;
 }
 
-void drawCircle(int x, int y, int level)
+bool checkCollision(Ball ball1, Ball ball2)
 {
-  txSetColor(RGB(255,0,0));
-  txSetFillColor(RGB(255,0,0));
-  txCircle(x,y,level*20);
-  txSetColor(RGB(0,0,0));
-  txSetFillColor(RGB(0,0,0));
-  txCircle(x,y,level*20 - 5);
+  return (sqrt(th_sqr(ball1.position.x - ball2.position.x) + th_sqr(ball1.position.y - ball2.position.y)) < ball1.r + ball2.r);
 }
 
-float th_sqr(float x)
+void resolveCollision(Ball* ball1, Ball* ball2)
 {
-  return x * x;
+  float ro = 1;
+  Vector2f r = add((*ball1).position, mul((*ball2).position, -1));
+  Vector2f v = add((*ball1).velocity, mul((*ball2).velocity, -1));
+  if (scMul(r,v) > 0)
+    return;
+
+  r = mul(r, 1/ (len(r)));
+
+  Vector2f n;
+  n.x = - r.y;
+  n.y = r.x;
+
+  float m1 = (4*3,14/3) * (*ball1).r * th_sqr((*ball1).r) * ro;
+  float m2 = (4*3,14/3) * (*ball2).r * th_sqr((*ball2).r) * ro;
+
+  Vector2f v1_n = mul(n, scMul((*ball1).velocity, n));
+  Vector2f v2_n = mul(n, scMul((*ball2).velocity, n));
+
+  float k = (m1  / m2);
+  float v1 = scMul((*ball1).velocity, r);
+  float v2 = scMul((*ball2).velocity, r);
+
+  float a = 1 + k;
+  float b = -2 * v2 - 2 * k * v1;
+  float c = (k - 1) * th_sqr(v1) + 2 * v1 * v2;
+
+  if (th_sqr(b) - 4*a*c < 0)
+    std::cout << "d < 0";
+
+  float v1_ = (-b + sqrt(th_sqr(b) - 4*a*c)) / (2 * a);
+  float v2_ = k * (v1 - v1_) + v2;
+
+  (*ball1).velocity = add(v1_n, mul(r, v1_));
+  (*ball2).velocity = add(v2_n, mul(r, v2_));
 }
 
-void th_paste_b(Ball safe, Ball b_features[], float n)
+float velocity(Ball ball)
 {
-  for(int i = 0; i < n; i++)
-  {
-    b_features[i].r = safe.r;
-    b_features[i].red = safe.red;
-    b_features[i].green = safe.green;
-    b_features[i].blue = safe.blue;
-    b_features[i].x = 700;
-    b_features[i].y = 400;
-    b_features[i].vx = (n / 2 - i + 0.3) * 0.7 +0.3 ;
-    b_features[i].vy = th_sqr(i - n / 2) * 0.1 + 10;
-  }
+  return len(ball.velocity);
 }
-
-void th_safe(float r, int red, int green, int blue, Ball* safe)
-{
-  (*safe).r = r;
-  (*safe).red = red;
-  (*safe).green = green;
-  (*safe).blue = blue;
-}
-
-void th_paste_p(Ball safe, Ball* player)
-{
-  (*player).r = safe.r;
-  (*player).red = safe.red;
-  (*player).green = safe.green;
-  (*player).blue = safe.blue;
-  (*player).x = 200;
-  (*player).y = 200;
-  (*player).vx = 0;
-  (*player).vy = 0;
-}
-
-
