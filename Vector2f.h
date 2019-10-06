@@ -1,3 +1,5 @@
+#include <math.h>
+
 struct Vector2f
 {
   float x = 100;

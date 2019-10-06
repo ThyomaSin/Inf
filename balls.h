@@ -1,8 +1,8 @@
 #include <iostream>
-#include "TXLib.h"
+#include <SFML/Graphics.hpp>
 #include "uI.h"
 #include "Vector2f.h"
-#include <math.h>
+
 
 const float dt = 1;
 
@@ -11,7 +11,7 @@ struct Ball
   int r = 10;
   int red = 255;
   int green = 255;
-  int blue = 255;
+  int blue = 0;
   Vector2f position;
   Vector2f velocity;
 };
@@ -19,21 +19,25 @@ struct Ball
 
 float velocity(Ball ball);
 
-void drawBall(Ball ball)
+void drawBall(Ball ball, sf::RenderWindow* window)
 {
-  COLORREF color = txGetFillColor();
+  sf::CircleShape circle(ball.r);
+  circle.setPosition(ball.position.x - ball.r, ball.position.y - ball.r);
+  
   for(int i = ball.r; i > 1; i--)
   {
     int red_i = ball.red - ball.red * i / ball.r;
     int green_i = ball.green - ball.green * i / ball.r;
     int blue_i = ball.blue - ball.blue * i / ball.r;
-
-    txSetColor(RGB(red_i,green_i,blue_i));
-    txSetFillColor(RGB(red_i,green_i,blue_i));
-    txCircle(ball.position.x - (ball.r - i) / 2, ball.position.y - (ball.r - i) / 2.3, i);
+    
+    circle.setFillColor(sf::Color(red_i, green_i, blue_i));
+    (*window).draw(circle);
+    circle.setRadius(i);
+    
+    float cx = ball.position.x - i + (ball.r - i) / 2;
+    float cy = ball.position.y - i + (ball.r - i) / 2.3;
+    circle.setPosition(cx, cy);   
   }
-  txSetColor(color);
-  txSetFillColor(color);
 }
 
 void wallHit(Ball* ball)
@@ -72,7 +76,8 @@ void slowDown(Ball* ball, float acc, float Vmin)
     (*ball).velocity = mul((*ball).velocity, acc);
 }
 
-void controlBall(Ball* ball, float dv)
+
+/*void controlBall(Ball* ball, float dv)
 {
   if (GetAsyncKeyState(VK_LEFT))
     (*ball).velocity.x -= dv;
@@ -83,10 +88,11 @@ void controlBall(Ball* ball, float dv)
   if (GetAsyncKeyState(VK_DOWN))
     (*ball).velocity.y += dv;
 }
+*/
 
 bool checkCollision(Ball ball1, Ball ball2)
 {
-  return (sqrt(th_sqr(ball1.position.x - ball2.position.x) + th_sqr(ball1.position.y - ball2.position.y)) < ball1.r + ball2.r);
+  return (len(add(ball1.position, mul(ball2.position, -1))) < ball1.r + ball2.r);
 }
 
 void resolveCollision(Ball* ball1, Ball* ball2)
