@@ -18,8 +18,10 @@ int main()
 
   for(int i = 0; i < n; i++)
   {
-    b_features[i].velocity.x = th_sqr(n / 2 - (i % 40) + 0.5) * 0.002;
-    b_features[i].velocity.y = th_sqr((i % 40) - n / 2)*0.002;
+    int vx = (i + 1) % 8;
+    int vy = (n - i + 1) % 8;
+    b_features[i].velocity.x = vx;
+    b_features[i].velocity.y = vy;
     b_features[i].position.x += 25 * (i % 20);
     b_features[i].position.y += 20 + 25 * (i / 20);
   }
@@ -34,8 +36,10 @@ int main()
 
   for (int i = 0; i < 30; i++)
     std::cout << std::endl;
+  sf::Event event;
+  window.setFramerateLimit(40);
 
-  while (true)
+  while (window.isOpen())
   {
     for (int i = 0; i < n; i++)
     {
@@ -49,7 +53,13 @@ int main()
     wallHit(&player);
     slowDown(&player, 0.99, 0);
     window.display();
-
+    
+    window.pollEvent(event);
+    if (event.type == sf::Event::Closed)
+    { 
+      window.close();
+      break;
+    }
     //controlBall(&player, dv);
 
     for (int i = 0; i < n; i++)

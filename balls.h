@@ -8,7 +8,7 @@ const float dt = 1;
 
 struct Ball
 {
-  int r = 10;
+  int r = 7;
   int red = 255;
   int green = 255;
   int blue = 0;
@@ -124,7 +124,7 @@ void resolveCollision(Ball* ball1, Ball* ball2)
   float c = (k - 1) * th_sqr(v1) + 2 * v1 * v2;
 
   if (th_sqr(b) - 4*a*c < 0)
-    std::cout << "d < 0";
+    return;
 
   float v1_ = (-b + sqrt(th_sqr(b) - 4*a*c)) / (2 * a);
   float v2_ = k * (v1 - v1_) + v2;
