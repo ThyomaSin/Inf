@@ -12,8 +12,8 @@ struct Ball
   int red = 255;
   int green = 255;
   int blue = 0;
-  Vector2f position;
-  Vector2f velocity;
+  Vector2f position = Vector2f(100, 100);
+  Vector2f velocity = Vector2f(100, 100);
 };
 
 
@@ -67,13 +67,13 @@ void wallHit(Ball* ball)
 
 void moveBall(Ball* ball, float dt)
 {
-  (*ball).position = add((*ball).position, (*ball).velocity);
+  (*ball).position = (*ball).position + (*ball).velocity;
 }
 
 void slowDown(Ball* ball, float acc, float Vmin)
 {
   if (velocity(*ball) > Vmin)
-    (*ball).velocity = mul((*ball).velocity, acc);
+    ((*ball).velocity) * (acc);
 }
 
 
@@ -92,32 +92,30 @@ void slowDown(Ball* ball, float acc, float Vmin)
 
 bool checkCollision(Ball ball1, Ball ball2)
 {
-  return (len(add(ball1.position, mul(ball2.position, -1))) < ball1.r + ball2.r);
+  return ((ball1.position + (ball2.position) * (-1)).len() < ball1.r + ball2.r);
 }
 
 void resolveCollision(Ball* ball1, Ball* ball2)
 {
   float ro = 1;
-  Vector2f r = add((*ball1).position, mul((*ball2).position, -1));
-  Vector2f v = add((*ball1).velocity, mul((*ball2).velocity, -1));
-  if (scMul(r,v) > 0)
+  Vector2f r = (*ball1).position + (((*ball2).position) * (-1));
+  Vector2f v = (*ball1).velocity + (((*ball2).velocity) * (-1));
+  if ((r ^ v) > 0)
     return;
 
-  r = mul(r, 1/ (len(r)));
+  r = r * (1/ r.len());
 
-  Vector2f n;
-  n.x = - r.y;
-  n.y = r.x;
+  Vector2f n = Vector2f(-r.y, r.x);
 
   float m1 = (4*3,14/3) * (*ball1).r * th_sqr((*ball1).r) * ro;
   float m2 = (4*3,14/3) * (*ball2).r * th_sqr((*ball2).r) * ro;
 
-  Vector2f v1_n = mul(n, scMul((*ball1).velocity, n));
-  Vector2f v2_n = mul(n, scMul((*ball2).velocity, n));
+  Vector2f v1_n = n * ((*ball1).velocity ^ (n));
+  Vector2f v2_n = n * ((*ball2).velocity ^ (n));
 
   float k = (m1  / m2);
-  float v1 = scMul((*ball1).velocity, r);
-  float v2 = scMul((*ball2).velocity, r);
+  float v1 = (*ball1).velocity ^ (r);
+  float v2 = (*ball2).velocity ^ (r);
 
   float a = 1 + k;
   float b = -2 * v2 - 2 * k * v1;
@@ -129,11 +127,11 @@ void resolveCollision(Ball* ball1, Ball* ball2)
   float v1_ = (-b + sqrt(th_sqr(b) - 4*a*c)) / (2 * a);
   float v2_ = k * (v1 - v1_) + v2;
 
-  (*ball1).velocity = add(v1_n, mul(r, v1_));
-  (*ball2).velocity = add(v2_n, mul(r, v2_));
+  (*ball1).velocity = v1_n + (r * (v1_));
+  (*ball2).velocity = v2_n + (r * (v2_));
 }
 
 float velocity(Ball ball)
 {
-  return len(ball.velocity);
+  return ball.velocity.len();
 }

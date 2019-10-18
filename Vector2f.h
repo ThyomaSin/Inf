@@ -4,35 +4,48 @@ struct Vector2f
 {
   float x = 100;
   float y = 100;
+
+  Vector2f operator* (float Const);
+  
+  Vector2f(float x, float y);
+
+  Vector2f operator+ (Vector2f v1);
+
+  float len();
+
+  float operator^ (Vector2f v1);
+  
 };
+
+Vector2f::Vector2f(float x, float y)
+{
+  this->x = x;
+  this->y = y;
+}
+
+Vector2f Vector2f::operator* (float Const)
+{
+  return Vector2f(this->x * Const, this->y * Const);
+}
 
 float th_sqr(float x)
 {
   return x * x;
 }
 
-Vector2f add(Vector2f v1, Vector2f v2)
+Vector2f Vector2f::operator+ (Vector2f v1)
 {
-  Vector2f v;
-  v.x = v1.x + v2.x;
-  v.y = v1.y + v2.y;
-  return v;
+  return Vector2f(this->x + v1.x, this->y + v1.y);
 }
 
-Vector2f mul(Vector2f v1, float Const)
+
+
+float Vector2f::len()
 {
-  Vector2f v;
-  v.x = v1.x * Const;
-  v.y = v1.y * Const;
-  return v;
+  return (sqrt(th_sqr(this->x) + th_sqr(this->y)));
 }
 
-float len(Vector2f v)
+float Vector2f::operator^ (Vector2f v1)
 {
-  return (sqrt(th_sqr(v.x) + th_sqr(v.y)));
-}
-
-float scMul(Vector2f v1, Vector2f v2)
-{
-  return v1.x * v2.x + v1.y * v2.y;
+  return v1.x * this->x + v1.y * this->y;
 }
