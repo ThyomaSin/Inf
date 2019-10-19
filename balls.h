@@ -2,8 +2,9 @@
 #include "TXLib.h"
 const float dt = 1;
 
-struct Ball
+class Ball
 {
+  public::
   int r = 0;
   int red = 0;
   int green = 0;
