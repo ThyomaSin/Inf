@@ -11,7 +11,7 @@ int main()
 
   int n = getNumber();
 
-  Ball player;
+  Ball player = Ball(Vector2f(800, 400), Vector2f(0, 0), 30, 255, 0, 255);
   Ball* b_features = new Ball[n];
 
   b_features[0].green = 0;
@@ -26,16 +26,6 @@ int main()
     b_features[i].position.y += 20 + 25 * (i / 20);
   }
 
-
-  player.r = 30;
-  player.green = 0;
-  player.position.x = 800;
-  player.position.y = 400;
-  player.velocity.x = 0;
-  player.velocity.y = 0;
-
-  for (int i = 0; i < 30; i++)
-    std::cout << std::endl;
   sf::Event event;
   window.setFramerateLimit(40);
 
@@ -43,37 +33,43 @@ int main()
   {
     for (int i = 0; i < n; i++)
     {
-      drawBall(b_features[i], &window);
-      moveBall(&b_features[i], dt);
-      wallHit(&b_features[i]);
-      slowDown(&b_features[i], 1, 2);
+      b_features[i].draw(&window);
+      b_features[i].move(dt);
+      b_features[i].wallHit();
+      b_features[i].slowDown(1, 2);
     }
-    drawBall(player, &window);
-    moveBall(&player, dt);
-    wallHit(&player);
-    slowDown(&player, 0.99, 0);
+    player.draw(&window);
+    player.move(dt);
+    player.wallHit();
+    player.slowDown(0.99, 0);
     window.display();
     
-    window.pollEvent(event);
-    if (event.type == sf::Event::Closed)
-    { 
-      window.close();
-      break;
+    
+    while(window.pollEvent(event))
+    {
+      if (event.type == sf::Event::Closed)
+      { 
+        window.close();
+        break;
+      }
+      if (event.type == sf::Event::KeyPressed)
+        if (event.key.code == sf::Keyboard::Space)
+        { 
+          window.close();
+          break;
+        }
     }
-    //controlBall(&player, dv);
+
+    controlBall(&player, dv);
 
     for (int i = 0; i < n; i++)
-      if (checkCollision(player, b_features[i]))
-        resolveCollision(&player, &b_features[i]);
+      if (player.checkCollision(b_features[i]))
+        player.resolveCollision(&b_features[i]);
 
     for (int i = 0; i < n - 1; i++)
       for (int j = i + 1; j < n; j++)
-        if (checkCollision(b_features[i], b_features[j]))
-          resolveCollision(&b_features[i], &b_features[j]);
-
-    //if (GetAsyncKeyState(VK_SPACE))
-      //break;
-    std::cout << player.red << std::endl;
+        if (b_features[i].checkCollision(b_features[j]))
+          b_features[i].resolveCollision(&b_features[j]);
 
     window.clear();
   }
