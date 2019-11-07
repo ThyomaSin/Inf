@@ -2,17 +2,19 @@
 #include <fstream>
 #include <SFML/Graphics.hpp>
 
-/*int getFileLen(std::fstream f)
+int getFileLen(std::ifstream* f)
 {
-  
+  f ->seekg(0,f -> end);
+  int len = f ->tellg();
+  f -> seekg(0,f -> beg);
   return len;
-}*/
+}
 
 void addLetters(char beDrawn[], char Text[], int pos, int currentPos)
 {
-  beDrawn[currentPos] = Text[pos];
-  beDrawn[currentPos + 1] = Text[pos + 1];
-  beDrawn[currentPos + 2] = '\0';
+  beDrawn[currentPos - 2] = Text[pos - 2];
+  beDrawn[currentPos - 1] = Text[pos - 1];
+  beDrawn[currentPos] = '\0';
 }
   
 void drawText(char beDrawn[], sf::RenderWindow* window, sf::Text* TEXT)
@@ -31,12 +33,13 @@ int countLines(char txt[], int length)
   return num;
 }
 
-int shorten(char txt[], int length)
+int shiftAndShorten(char txt[], int length)
 {
   int k = 0;
   while ((txt[k] != '\n') and (txt[k] != '\0'))
     k++;
-  int i = k + 1;
+  k++;
+  int i = k;
   while (txt[i] != '\0') 
   {
     txt[i - k] = txt[i];
@@ -47,6 +50,23 @@ int shorten(char txt[], int length)
   return length;
 }
 
+void keyPressed(int* pos, int* currentPos, int len, char beDrawn[], char text[], sf::RenderWindow* window, sf::Text* TEXT)
+{
+  (*pos) += 2;
+  (*currentPos) += 2;
+  if ((*pos) >= len - 2)
+  {
+    *pos = 0;
+    beDrawn[0] = '\0';
+  }
+  addLetters(beDrawn, text, *pos, *currentPos);
+  drawText(beDrawn, window, TEXT);
+  if (countLines(beDrawn, *currentPos) > 30)
+    *currentPos = shiftAndShorten(beDrawn, *currentPos);
+
+  window -> clear();
+  window -> display();
+}
 
 int main()
 {
@@ -56,21 +76,20 @@ int main()
   TEXT.setFont(font);
   TEXT.setCharacterSize(15);
   TEXT.setColor(sf::Color::Green);
+  sf::RenderWindow window(sf::VideoMode(1000, 600), "hackerman");
+  window.clear();
+  
 
-  std::fstream f;
+  std::ifstream f;
   f.open("hackertyper.txt");
-  f.seekg(0,f.end);
-  int len = f.tellg();
-  f.seekg(0,f.beg); 
+  int len = getFileLen(&f);
+
   char* text = new char[len];
   f.read(text, len);
   f.close();
   
   char* beDrawn = new char[len];
 
-  sf::RenderWindow window(sf::VideoMode(1000, 600), "hackerman");
-  window.clear();
-  
   int pos = 0;
   int currentPos = 0;
   sf::Event event;
@@ -84,22 +103,8 @@ int main()
         window.close();
         return 0;
       }
-      if (pos >= len - 2)
-      {
-        pos = 0;
-        beDrawn[0] = '\0';
-      }
       if (event.type == sf::Event::KeyPressed)
-      {
-        window.clear();
-        addLetters(beDrawn, text, pos, currentPos);
-        drawText(beDrawn, &window, &TEXT);
-        pos += 2;
-        currentPos += 2;
-        window.display();
-      }
-      if (countLines(beDrawn, currentPos) > 30)
-        currentPos = shorten(beDrawn, currentPos);
+        keyPressed(&pos, &currentPos, len, beDrawn, text, &window, &TEXT);
     }
   }
   delete[] text;
