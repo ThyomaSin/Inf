@@ -6,8 +6,17 @@
 
 const float dt = 1;
 
-struct Ball
+class drawableObj
 {
+  public:
+  bool isvisible = true;
+  bool exist = false;
+  virtual void draw(sf::RenderWindow* window);
+};
+
+class Ball : public drawableObj
+{
+  public:
   int r = 7;
   int red = 255;
   int green = 255;
@@ -25,6 +34,72 @@ struct Ball
   void resolveCollision(Ball* ball);
   float Velocity();
 };
+
+class grManager
+{
+  private:
+    drawableObj** obj = new drawableObj*[100];
+  public:
+    void reg(drawableObj* dObj);
+    void del(drawableObj* dObj);
+    void drawAll(sf::RenderWindow* window);
+    ~grManager();
+};
+
+grManager::~grManager()
+{
+  delete[] obj;
+}
+
+
+bool ifEndOfObj(drawableObj* obj[])
+{
+  int i = 0;
+  while (obj[i] -> exist)
+    i++;
+  if ((i - 98) % 100 == 0)
+    return true;
+  return false;
+}
+
+int countObj(drawableObj* obj[])
+{
+  int i = 0;
+  while (obj[i] -> exist)
+    i++;
+  return (i);
+}
+
+void grManager::reg(drawableObj* dObj)
+{
+  int n = 0;
+  if (ifEndOfObj(obj))
+  {
+    n = countObj(obj);
+    delete [] obj;
+    drawableObj** obj = new drawableObj*[n + 100];
+  }
+  obj[n] = dObj;
+  (obj[n]) -> exist = true;
+}
+
+void grManager::del(drawableObj* dObj)
+{
+  int i = 0;
+  while (obj[i] != dObj)
+    i++;
+  int j = i;
+  for(j = i; j < countObj(obj) - 1; j++)
+    this -> obj[i] = this -> obj[i+1];
+  (this -> obj[j + 1]) -> exist = false;
+}
+
+void grManager::drawAll(sf::RenderWindow* window)
+{ 
+  int n = countObj(obj);
+  for (int i = 0; i < n; i++)
+    obj[i] -> draw(window); 
+} 
 
 Ball::Ball(Vector2f position, Vector2f velocity, int r, int red, int green, int blue)
 {
@@ -60,6 +135,11 @@ void Ball::draw(sf::RenderWindow* window)
     circle.setPosition(cx, cy);   
   }
 }
+
+void drawableObj::draw(sf::RenderWindow* window)
+{
+}
+
 
 void Ball::wallHit()
 {

@@ -1,7 +1,8 @@
 #include <math.h>
 
-struct Vector2f
+class Vector2f
 {
+  public:
   float x = 100;
   float y = 100;
 
