@@ -8,33 +8,36 @@ int main()
   float dv = 0.3;
   sf::RenderWindow window(sf::VideoMode(1000, 600), "Balls fly");
   window.clear();
+  grManager objects;
+
+  int nOfObj = 0;
+  int size = 100;
 
   int n = getNumber();
-
   Ball player = Ball(Vector2f(800, 400), Vector2f(0, 0), 30, 255, 0, 255);
-  grManager objects;
-  objects.reg(&player);
-
-  player.draw(&window);
   Ball* b_features = new Ball[n];
+
+  objects.reg(&player, nOfObj, &size);
+  nOfObj++;
 
   b_features[0].green = 0;
 
   for(int i = 0; i < n; i++)
   {
-    objects.reg(&(b_features[i]));
+    objects.reg(&(b_features[i]), nOfObj, &size);
+    nOfObj++;
     int vx = (i + 1) % 8;
     int vy = (n - i + 1) % 8;
     b_features[i].velocity.x = vx;
     b_features[i].velocity.y = vy;
-    b_features[i].position.x += 25 * (i % 20);
-    b_features[i].position.y += 20 + 25 * (i / 20);
+    b_features[i].position.x += 20 + 25 * (i % 30);
+    b_features[i].position.y += 20 + 25 * (i / 30);
   }
 
   sf::Event event;
   while (window.isOpen())
   {
-    objects.drawAll(&window);
+    objects.drawAll(&window, nOfObj);
     window.display();                      //draw
 
     for (int i = 0; i < n; i++)  //physics

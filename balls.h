@@ -10,7 +10,6 @@ class drawableObj
 {
   public:
   bool isvisible = true;
-  bool exist = false;
   virtual void draw(sf::RenderWindow* window);
 };
 
@@ -21,7 +20,7 @@ class Ball : public drawableObj
   int red = 255;
   int green = 255;
   int blue = 0;
-  Vector2f position = Vector2f(100, 100);
+  Vector2f position = Vector2f(0, 0);
   Vector2f velocity = Vector2f(100, 100);
 
   Ball(Vector2f position, Vector2f velocity, int r, int red, int green, int blue);
@@ -40,9 +39,10 @@ class grManager
   private:
     drawableObj** obj = new drawableObj*[100];
   public:
-    void reg(drawableObj* dObj);
-    void del(drawableObj* dObj);
-    void drawAll(sf::RenderWindow* window);
+    void reg(drawableObj* dObj, int i, int* size);
+    void del(int pos, int* n);
+    void drawAll(sf::RenderWindow* window, int nOfObj);
+    void clear();
     ~grManager();
 };
 
@@ -51,52 +51,29 @@ grManager::~grManager()
   delete[] obj;
 }
 
-
-bool ifEndOfObj(drawableObj* obj[])
+void grManager::reg(drawableObj* dObj, int i, int* size)
 {
-  int i = 0;
-  while (obj[i] -> exist)
-    i++;
-  if ((i - 98) % 100 == 0)
-    return true;
-  return false;
-}
-
-int countObj(drawableObj* obj[])
-{
-  int i = 0;
-  while (obj[i] -> exist)
-    i++;
-  return (i);
-}
-
-void grManager::reg(drawableObj* dObj)
-{
-  int n = 0;
-  if (ifEndOfObj(obj))
+  if (i >= *size)
   {
-    n = countObj(obj);
-    delete [] obj;
-    drawableObj** obj = new drawableObj*[n + 100];
+    drawableObj** newobj = new drawableObj*[*size + 100];
+    for (int j = 0; j < *size; j++)
+      newobj[j] = obj[j];
+    obj = newobj;
+    *size += 100;
   }
-  obj[n] = dObj;
-  (obj[n]) -> exist = true;
+  obj[i] = dObj;
 }
 
-void grManager::del(drawableObj* dObj)
+void grManager::del(int pos, int* n)
 {
-  int i = 0;
-  while (obj[i] != dObj)
-    i++;
-  int j = i;
-  for(j = i; j < countObj(obj) - 1; j++)
-    this -> obj[i] = this -> obj[i+1];
-  (this -> obj[j + 1]) -> exist = false;
+  int j = pos;
+  for(j = pos; j < *n - 1; j++)
+    this -> obj[j] = this -> obj[j+1];
+  *n--;
 }
 
-void grManager::drawAll(sf::RenderWindow* window)
+void grManager::drawAll(sf::RenderWindow* window, int n)
 { 
-  int n = countObj(obj);
   for (int i = 0; i < n; i++)
     obj[i] -> draw(window); 
 } 
@@ -114,6 +91,7 @@ Ball::Ball(Vector2f position, Vector2f velocity, int r, int red, int green, int 
 Ball::Ball()
 {
 }
+ 
   
 void Ball::draw(sf::RenderWindow* window)
 {
@@ -195,7 +173,7 @@ void controlBall(Ball* ball, float dv)
 
 bool Ball::checkCollision(Ball ball)
 {
-  return ((this -> position + (ball.position) * (-1)).len() < this -> r + ball.r);
+  return (((this -> position + (ball.position) * (-1)).len() < this -> r + ball.r) and (ball.isvisible == true));
 }
 
 void Ball::resolveCollision(Ball* ball)
