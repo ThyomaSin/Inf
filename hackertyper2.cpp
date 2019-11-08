@@ -2,69 +2,98 @@
 #include <fstream>
 #include <SFML/Graphics.hpp>
 
+class string
+{
+  public:
+  int nmax;
+  char* s;
+  int currentPos = 0;
+
+  void append(string* Text);
+  void draw(sf::RenderWindow* window, sf::Text* TEXT);
+  int countLines();
+  void shiftAndShorten();
+  string(int nmax);
+  string();
+  ~string();
+};
+  
+string::string(int nmax)
+{
+  this -> s = new char[nmax];
+}
+
+string::string()
+{
+}
+
+string::~string()
+{
+  delete[] s;
+}
+
 int getFileLen(std::ifstream* f)
 {
-  f ->seekg(0,f -> end);
-  int len = f ->tellg();
+  f -> seekg(0,f -> end);
+  int len = f -> tellg();
   f -> seekg(0,f -> beg);
   return len;
 }
 
-void addLetters(char beDrawn[], char Text[], int pos, int currentPos)
+void string::append(string* Text)
 {
-  beDrawn[currentPos - 2] = Text[pos - 2];
-  beDrawn[currentPos - 1] = Text[pos - 1];
-  beDrawn[currentPos] = '\0';
+  this -> currentPos += 2;
+  Text -> currentPos += 2;
+  (this -> s)[this -> currentPos - 2] = (Text -> s)[Text -> currentPos - 2];
+  (this -> s)[this -> currentPos - 1] = (Text -> s)[Text -> currentPos - 1];
+  (this -> s)[this -> currentPos] = '\0';
 }
   
-void drawText(char beDrawn[], sf::RenderWindow* window, sf::Text* TEXT)
+void string::draw(sf::RenderWindow* window, sf::Text* TEXT)
 {
-  TEXT -> setString(beDrawn);
+  TEXT -> setString(this -> s);
   window -> draw((*TEXT));
   TEXT -> setString("");
 }
 
-int countLines(char txt[], int length)
+int string::countLines()
 {
   int num = 0;
-  for (int i = 0; i < length; i++)
-    if (txt[i] == '\n')
+  for(int i = 0; i < this -> currentPos; i++)
+    if ((this -> s)[i] == '\n')
       num += 1;
   return num;
 }
 
-int shiftAndShorten(char txt[], int length)
+void string::shiftAndShorten()
 {
   int k = 0;
-  while ((txt[k] != '\n') and (txt[k] != '\0'))
+  while ((this -> s[k] != '\n') and (this -> s[k] != '\0'))
     k++;
   k++;
   int i = k;
-  while (txt[i] != '\0') 
+  while (this -> s[i] != '\0') 
   {
-    txt[i - k] = txt[i];
+    this -> s[i - k] = this -> s[i];
     i++;
   }
-  length -= k;
-  txt[i - k] = '\0';
-  return length;
+  this -> currentPos -= k;
+  this -> s[i - k] = '\0';
 }
 
-void keyPressed(int* pos, int* currentPos, int len, char beDrawn[], char text[], sf::RenderWindow* window, sf::Text* TEXT)
+void keyPressed(int len, string* beDrawn, string* text, sf::RenderWindow* window, sf::Text* TEXT)
 {
-  (*pos) += 2;
-  (*currentPos) += 2;
-  if ((*pos) >= len - 2)
+  if (text -> currentPos >= len - 2)
   {
-    *pos = 0;
-    beDrawn[0] = '\0';
+    text -> currentPos = 0;
+    beDrawn -> s[0] = '\0';
   }
-  addLetters(beDrawn, text, *pos, *currentPos);
-  drawText(beDrawn, window, TEXT);
-  if (countLines(beDrawn, *currentPos) > 30)
-    *currentPos = shiftAndShorten(beDrawn, *currentPos);
+  beDrawn -> append(text);
+  if (beDrawn -> countLines() > 30)
+    beDrawn -> shiftAndShorten();
 
   window -> clear();
+  beDrawn -> draw(window, TEXT);
   window -> display();
 }
 
@@ -84,14 +113,12 @@ int main()
   f.open("hackertyper.txt");
   int len = getFileLen(&f);
 
-  char* text = new char[len];
-  f.read(text, len);
+  string text = string(len);
+  f.read(text.s, len);
   f.close();
   
-  char* beDrawn = new char[len];
+  string beDrawn = string(len);
 
-  int pos = 0;
-  int currentPos = 0;
   sf::Event event;
   
   while(window.isOpen())
@@ -104,11 +131,9 @@ int main()
         return 0;
       }
       if (event.type == sf::Event::KeyPressed)
-        keyPressed(&pos, &currentPos, len, beDrawn, text, &window, &TEXT);
+        keyPressed(len, &beDrawn, &text, &window, &TEXT);
     }
   }
-  delete[] text;
-  delete[] beDrawn;
   return 0;
 }
     
