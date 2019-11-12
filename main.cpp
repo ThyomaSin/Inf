@@ -7,25 +7,19 @@ int main()
 {
   float dv = 0.3;
   sf::RenderWindow window(sf::VideoMode(1000, 600), "Balls fly");
-  window.clear();
   grManager objects;
-
-  int nOfObj = 0;
-  int size = 100;
 
   int n = getNumber();
   Ball player = Ball(Vector2f(800, 400), Vector2f(0, 0), 30, 255, 0, 255);
   Ball* b_features = new Ball[n];
 
-  objects.reg(&player, nOfObj, &size);
-  nOfObj++;
-
+  objects.registrate(&player);
+  
   b_features[0].green = 0;
 
   for(int i = 0; i < n; i++)
   {
-    objects.reg(&(b_features[i]), nOfObj, &size);
-    nOfObj++;
+    objects.registrate(&(b_features[i]));
     int vx = (i + 1) % 8;
     int vy = (n - i + 1) % 8;
     b_features[i].velocity.x = vx;
@@ -35,10 +29,10 @@ int main()
   }
 
   sf::Event event;
+  void* pointer = &window;
   while (window.isOpen())
   {
-    objects.drawAll(&window, nOfObj);
-    window.display();                      //draw
+    objects.drawAll(pointer);                      //draw
 
     for (int i = 0; i < n; i++)  //physics
     {
@@ -58,11 +52,7 @@ int main()
       for (int j = i + 1; j < n; j++)
         if (b_features[i].checkCollision(b_features[j]))
           b_features[i].resolveCollision(&b_features[j]);
-
-    
-    
-    
-    
+   
     while(window.pollEvent(event))  //events
     {
       if (event.type == sf::Event::Closed)
@@ -79,8 +69,6 @@ int main()
     }
 
     controlBall(&player, dv);  //controlling&feedback
-
-    window.clear();
   }
 
   delete[] b_features;

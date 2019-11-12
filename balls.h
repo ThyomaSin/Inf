@@ -2,16 +2,9 @@
 #include <SFML/Graphics.hpp>
 #include "uI.h"
 #include "Vector2f.h"
-
+#include "GrManager.h"
 
 const float dt = 1;
-
-class drawableObj
-{
-  public:
-  bool isvisible = true;
-  virtual void draw(sf::RenderWindow* window);
-};
 
 class Ball : public drawableObj
 {
@@ -25,7 +18,7 @@ class Ball : public drawableObj
 
   Ball(Vector2f position, Vector2f velocity, int r, int red, int green, int blue);
   Ball();
-  void draw(sf::RenderWindow* window);
+  void draw(void* pointer);
   void wallHit();
   void move(float dt);
   void slowDown(float acc, float Vmin);
@@ -33,50 +26,6 @@ class Ball : public drawableObj
   void resolveCollision(Ball* ball);
   float Velocity();
 };
-
-class grManager
-{
-  private:
-    drawableObj** obj = new drawableObj*[100];
-  public:
-    void reg(drawableObj* dObj, int i, int* size);
-    void del(int pos, int* n);
-    void drawAll(sf::RenderWindow* window, int nOfObj);
-    void clear();
-    ~grManager();
-};
-
-grManager::~grManager()
-{
-  delete[] obj;
-}
-
-void grManager::reg(drawableObj* dObj, int i, int* size)
-{
-  if (i >= *size)
-  {
-    drawableObj** newobj = new drawableObj*[*size + 100];
-    for (int j = 0; j < *size; j++)
-      newobj[j] = obj[j];
-    obj = newobj;
-    *size += 100;
-  }
-  obj[i] = dObj;
-}
-
-void grManager::del(int pos, int* n)
-{
-  int j = pos;
-  for(j = pos; j < *n - 1; j++)
-    this -> obj[j] = this -> obj[j+1];
-  *n--;
-}
-
-void grManager::drawAll(sf::RenderWindow* window, int n)
-{ 
-  for (int i = 0; i < n; i++)
-    obj[i] -> draw(window); 
-} 
 
 Ball::Ball(Vector2f position, Vector2f velocity, int r, int red, int green, int blue)
 {
@@ -91,10 +40,10 @@ Ball::Ball(Vector2f position, Vector2f velocity, int r, int red, int green, int 
 Ball::Ball()
 {
 }
- 
-  
-void Ball::draw(sf::RenderWindow* window)
+   
+void Ball::draw(void* pointer)
 {
+  sf::RenderWindow* window = (sf::RenderWindow*) pointer;
   sf::CircleShape circle(this -> r);
   circle.setPosition(this -> position.x - this -> r, this -> position.y - this -> r);
   
@@ -112,10 +61,6 @@ void Ball::draw(sf::RenderWindow* window)
     float cy = this -> position.y - i + (this -> r - i) / 2.3;
     circle.setPosition(cx, cy);   
   }
-}
-
-void drawableObj::draw(sf::RenderWindow* window)
-{
 }
 
 
