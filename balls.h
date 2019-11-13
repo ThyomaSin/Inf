@@ -6,7 +6,7 @@
 
 const float dt = 1;
 
-class Ball : public drawableObj
+class Ball : public DrawableObj
 {
   public:
   int r = 7;

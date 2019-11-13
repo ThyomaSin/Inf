@@ -1,42 +1,34 @@
-class drawableObj
+class DrawableObj
 {
   public:
   bool isvisible = true;
   virtual void draw(void* pointer);  
 };
-/*
-drawableObj::drawableObj()
-{
-}
 
-drawableObj::~drawableObj()
-{
-}*/
-
-class grManager
+class GrManager
 {
   private:
-    drawableObj** obj = new drawableObj*[100];
+    DrawableObj** obj = new DrawableObj*[100];
   public:
     int i = 0;
     int size = 100;
-    void registrate(drawableObj* dObj);
-    void deletion(drawableObj* dObj);
+    void registrate(DrawableObj* dObj);
+    void deletion(DrawableObj* dObj);
     void drawAll(void* pointer);
     void clear();
-    ~grManager();
+    ~GrManager();
 };
 
-grManager::~grManager()
+GrManager::~GrManager()
 {
   delete[] obj;
 }
 
-void grManager::registrate(drawableObj* dObj)
+void GrManager::registrate(DrawableObj* dObj)
 {
   if (i >= size)
   {
-    drawableObj** newobj = new drawableObj*[size + 100];
+    DrawableObj** newobj = new DrawableObj*[size + 100];
     for (int j = 0; j < size; j++)
       newobj[j] = obj[j];
     obj = newobj;
@@ -46,7 +38,11 @@ void grManager::registrate(drawableObj* dObj)
   i++;
 }
 
-void grManager::deletion(drawableObj* dObj)
+void DrawableObj::draw(void* pointer)
+{
+}
+
+void GrManager::deletion(DrawableObj* dObj)
 {
   int j = 0;
   while (obj[j] != dObj)
@@ -57,7 +53,7 @@ void grManager::deletion(drawableObj* dObj)
   i--;
 }
 
-void grManager::drawAll(void* pointer)
+void GrManager::drawAll(void* pointer)
 { 
   (*(sf::RenderWindow*) pointer).clear();
   for (int j = 0; j < i; j++)

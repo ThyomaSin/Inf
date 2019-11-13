@@ -7,7 +7,7 @@ int main()
 {
   float dv = 0.3;
   sf::RenderWindow window(sf::VideoMode(1000, 600), "Balls fly");
-  grManager objects;
+  GrManager objects;
 
   int n = getNumber();
   Ball player = Ball(Vector2f(800, 400), Vector2f(0, 0), 30, 255, 0, 255);
