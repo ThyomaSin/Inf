@@ -1,3 +1,5 @@
+#include "List.h"
+
 class DrawableObj
 {
   public:
@@ -7,35 +9,18 @@ class DrawableObj
 
 class GrManager
 {
-  private:
-    DrawableObj** obj = new DrawableObj*[100];
   public:
-    int i = 0;
-    int size = 100;
+    List list;
     void registrate(DrawableObj* dObj);
     void deletion(DrawableObj* dObj);
     void drawAll(void* pointer);
     void clear();
-    ~GrManager();
+    //~GrManager();
 };
-
-GrManager::~GrManager()
-{
-  delete[] obj;
-}
 
 void GrManager::registrate(DrawableObj* dObj)
 {
-  if (i >= size)
-  {
-    DrawableObj** newobj = new DrawableObj*[size + 100];
-    for (int j = 0; j < size; j++)
-      newobj[j] = obj[j];
-    obj = newobj;
-    size += 100;
-  }
-  obj[i] = dObj;
-  i++;
+  list.append((void*) dObj);
 }
 
 void DrawableObj::draw(void* pointer)
@@ -44,20 +29,14 @@ void DrawableObj::draw(void* pointer)
 
 void GrManager::deletion(DrawableObj* dObj)
 {
-  int j = 0;
-  while (obj[j] != dObj)
-    j++;
-  
-  for(int k = j; k < i - 1; k++)
-    this -> obj[k] = this -> obj[k+1];
-  i--;
+  list.remove((void*) dObj);
 }
 
 void GrManager::drawAll(void* pointer)
 { 
   (*(sf::RenderWindow*) pointer).clear();
-  for (int j = 0; j < i; j++)
-    obj[j] -> draw(pointer);
+  for (int j = 0; j < list.len(); j++)
+    (*(DrawableObj*) (list.pull(j))).draw(pointer);
   (*(sf::RenderWindow*) pointer).display(); 
 } 
 
