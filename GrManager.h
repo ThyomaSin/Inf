@@ -4,7 +4,7 @@ class DrawableObj
 {
   public:
   bool isvisible = true;
-  virtual void draw(void* pointer);  
+  virtual void draw(sf::RenderWindow* pointer);  
 };
 
 class GrManager
@@ -12,7 +12,7 @@ class GrManager
   public:
     List list;
     void registrate(DrawableObj* dObj);
-    void deletion(DrawableObj* dObj);
+    void unregistrate(DrawableObj* dObj);
     void drawAll(void* pointer);
     void clear();
     //~GrManager();
@@ -27,16 +27,16 @@ void DrawableObj::draw(void* pointer)
 {
 }
 
-void GrManager::deletion(DrawableObj* dObj)
+void GrManager::unregistrate(DrawableObj* dObj)
 {
   list.remove((void*) dObj);
 }
 
-void GrManager::drawAll(void* pointer)
+void GrManager::drawAll(sf::RenderWindow* pointer)
 { 
-  (*(sf::RenderWindow*) pointer).clear();
+  pointer.clear();
   for (int j = 0; j < list.len(); j++)
     (*(DrawableObj*) (list.pull(j))).draw(pointer);
-  (*(sf::RenderWindow*) pointer).display(); 
+  pointer.display(); 
 } 
 

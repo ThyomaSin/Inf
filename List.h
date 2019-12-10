@@ -3,6 +3,7 @@ class Node
   public:
   void* obj;
   Node* next = NULL;
+  Node(void* object, Node* next);
 };
 
 class List
@@ -13,21 +14,28 @@ class List
   void* popFront();
   void append(void* obj);
   //void remove((void*) obj);
-  void* pull(int j);
+  int& operator[](int j);
   int len();
   void remove(void* object);
 };  
 
+
+Node::Node(void* object, Node* NEXT)
+{
+  this -> obj = object;
+  this -> next = NEXT;
+}
+ 
 void List::pushFront(void* add)
 {
-  Node* newObj = new Node;
-  newObj -> obj = add;
-  newObj -> next = head;
+  Node* newObj = Node(add, head);
   head = newObj;
 }
 
 void* List::popFront()
 {
+  if (head == NULL)
+    return (void*) NULL;
   Node* pointer = head;
   head = head -> next;
   return pointer -> obj;
@@ -35,26 +43,29 @@ void* List::popFront()
 
 void List::append(void* object)
 {
-  Node* newNode = new Node;
+  Node* newNode = Node(object, NULL);
   Node* current = head;
-  newNode -> obj = object;
-  if (current != NULL)
+  
+  if (!current)
   {
-    while (current -> next != NULL)
-    {
-      current = current -> next;
-    }
-    current -> next = newNode;
+    head = newNode;
+    return;
   }
-  else head = newNode;
+
+  while (current -> next != NULL)
+    current = current -> next;
+ 
+  current -> next = newNode;
 }
 
-void* List::pull(int i)
+int& List::operator[](int i)
 {
   Node* current = head;
   int j = 0;
   while (i != j)
   {
+    if (!current)
+      return NULL;
     current = current -> next;
     j++;
   }
@@ -63,8 +74,10 @@ void* List::pull(int i)
 
 int List::len()
 {
-  int i = 1;
+  int i = 0;
   Node* current = head;
+  if (!current)
+      return i;
   while (current -> next != NULL)
   {
     current = current -> next;
@@ -95,7 +108,7 @@ void List::remove(void* object)
     return;
   } 
 
-  while ((current -> next -> obj != object) and (current -> next != NULL))
+  while ((current -> next != NULL) and (current -> next -> obj != object))
   {
     current = current -> next;
   }
