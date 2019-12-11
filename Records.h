@@ -1,7 +1,7 @@
 #include <fstream>
 #include <time.h>
 
-class Records : public DrawableObj
+class Records
 {
   public:
   std::string text;
@@ -27,7 +27,36 @@ Records::Records(sf::Font font, int characterSize, sf::Color color)
 std::string getDate()
 {
   const time_t timer = time(NULL);
-  return timer + " ";
+  struct tm* u;
+  u = localtime(&timer);
+  
+  char year[5];
+  std::sprintf(year,"%04d", u -> tm_year + 1900);
+  char month[3];
+  std::sprintf(month,"%02d", u -> tm_mon + 1);
+  char day[3];
+  std::sprintf(day,"%02d", u -> tm_mday);
+  char hour[3];
+  std::sprintf(hour,"%02d", u -> tm_hour);
+  char min[3];
+  std::sprintf(min,"%02d", u -> tm_min);
+  char sec[3];
+  std::sprintf(sec,"%02d", u -> tm_sec);
+  
+  std::string s;
+  s += year;
+  s += "_";
+  s += month;
+  s += "_";
+  s += day;
+  s += "   ";
+  s += hour; 
+  s += ":";
+  s += min; 
+  s += ":";
+  s += sec;
+  s += "  ";
+  return s;
 }
 
 
@@ -54,9 +83,12 @@ void Records::commitChanges()
   std::getline(read, text, '\0');
   read.close();
   
-  char T;
-  std::sprintf(&T,"%d", time);
-  std::string s = getDate() + T + '\n' + text;
+  char T[7];
+  std::sprintf(T,"%6d", time);
+  std::string s = getDate();
+  s += T;
+  s += '\n';
+  s += text;
   text = s;  
 
   std::ofstream write;
